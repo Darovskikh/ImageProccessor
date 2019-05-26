@@ -26,6 +26,7 @@ namespace ImageProccessor
         {
             Console.ForegroundColor = _color;
             Console.WriteLine(text);
+            Console.WriteLine();
             Console.ResetColor();
 
         }
@@ -33,6 +34,7 @@ namespace ImageProccessor
         {
             Console.ForegroundColor = color;
             Console.WriteLine(text);
+            Console.WriteLine();
             Console.ResetColor();
 
         }

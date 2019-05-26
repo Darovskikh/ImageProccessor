@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Drawing;
 using System.Net;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
 using MetadataExtractor;
@@ -19,7 +20,11 @@ namespace ImageProccessor
         private string _path;
         public delegate void ShowMessageImageProcHandler(ImageProcessorClass sender, ImageProcEventArgs e);
 
-        public event ShowMessageImageProcHandler ImageLoading;
+        public event ShowMessageImageProcHandler ImageLoadingEvent;
+        public event ShowMessageImageProcHandler RenamePhotoDateEvent;
+        public event ShowMessageImageProcHandler AddDateOnPhotoEvent;
+        public event ShowMessageImageProcHandler SortPhotoByYearEvent;
+        public event ShowMessageImageProcHandler SortImageByLocationEvent;
         public List<Image> Images { get; set; } = new List<Image>();
 
         public static Skin Skin { get; set; }
@@ -34,7 +39,7 @@ namespace ImageProccessor
         public void LoadPhoto()
         {
             Console.WriteLine();
-            ImageLoading?.Invoke(this, new ImageProcEventArgs() { Message = "Укажите путь к папке с изображениями" });
+            ImageLoadingEvent?.Invoke(this, new ImageProcEventArgs() {Message = "Укажите путь к папке с изображениями"});
             Thread thread = new Thread(() =>
             {
                 using (FolderBrowserDialog fbd = new FolderBrowserDialog())
@@ -56,17 +61,45 @@ namespace ImageProccessor
                     FileInfos.Add(file);
                     Images.Add(Image.FromFile(file.FullName));
                 }
+                ImageLoadingEvent?.Invoke(this, new ImageProcEventArgs() { Message = "Изображения загружены" });
+                Thread.Sleep(2000);
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
-                ImageLoading?.Invoke(this, new ImageProcEventArgs() { Message = e.Message });
+                ImageLoadingEvent?.Invoke(this, new ImageProcEventArgs() { Message = e.Message });
             }
 
         }
-        // Добавить пул потоков для ускорения
-        public void RenamePhotoDate()
+        public async void RenamePhotoDateAsync()
         {
+            RenamePhotoDateEvent?.Invoke(this, new ImageProcEventArgs() { Message = "Переименование начато" });
+            await Task.Run(()=>RenamePhotoDate());
+            RenamePhotoDateEvent?.Invoke(this, new ImageProcEventArgs() { Message = "Переименование завершено" });
+        }
+
+        public async void AddDateOnPhotoAsync()
+        {
+            AddDateOnPhotoEvent?.Invoke(this, new ImageProcEventArgs() { Message = "Доабавление даты начато" });
+            await Task.Run(() => AddDateOnPhoto());
+            AddDateOnPhotoEvent?.Invoke(this, new ImageProcEventArgs() { Message = "Добавление даты и времени на фото завершено" });
+        }
+
+        public async void SortPhotoByYearAsync()
+        {
+            SortPhotoByYearEvent?.Invoke(this, new ImageProcEventArgs() { Message = "Сортировка фото по годам начата" });
+            await Task.Run(() => SortPhotoByYear());
+            SortPhotoByYearEvent?.Invoke(this, new ImageProcEventArgs() { Message = "Сортировка фото по годам завершена" });
+        }
+
+        public async void SortImageByLocationAsync()
+        {
+            SortImageByLocationEvent?.Invoke(this, new ImageProcEventArgs() { Message = "Процесс сортировки по геологации начат" });
+            await Task.Run(() => SortImageByLocation());
+            SortImageByLocationEvent?.Invoke(this, new ImageProcEventArgs() { Message = "Сортировка фото по геологации завершена" });
+        }
+        private void RenamePhotoDate()
+        {
+            Thread.Sleep(5000);
             DirectoryInfo drInfo = new DirectoryInfo(_path);
             Directory.CreateDirectory(_path + $@"\{drInfo.Name}_RenamePhotoDate");
             string newPath = _path + $@"\{drInfo.Name}_RenamePhotoDate";
@@ -77,10 +110,12 @@ namespace ImageProccessor
                 string fullnewpath = newPath + newpath1;
                 File.Copy($"{file.FullName}", fullnewpath, true);
             }
+            
         }
 
-        public void AddDateOnPhoto()
+        private void AddDateOnPhoto()
         {
+           
             DirectoryInfo drInfo = new DirectoryInfo(_path);
             string newPath = _path + $@"\{drInfo.Name}_AddDateOnPhoto";
             Directory.CreateDirectory(newPath);
@@ -97,8 +132,9 @@ namespace ImageProccessor
             }
         }
 
-        public void SortPhotoByYear()
+        private void SortPhotoByYear()
         {
+            
             DirectoryInfo drInfo = new DirectoryInfo(_path);
             string newPath = _path + $@"\{drInfo.Name}_SortPhotoByYear";
             Directory.CreateDirectory(newPath);
@@ -114,11 +150,13 @@ namespace ImageProccessor
                 Directory.CreateDirectory($"{newPath}" + $"\\{file.Value}");
                 File.Copy($"{file.Key.FullName}", fullNewPath, true);
             }
+           
 
         }
 
-        public void SortImageByLocation()
+        private void SortImageByLocation()
         {
+            
             DirectoryInfo drInfo = new DirectoryInfo(_path);
             string newPath = _path + $@"\{drInfo.Name}_SortImageByLocation";
             Directory.CreateDirectory(newPath);
@@ -144,7 +182,7 @@ namespace ImageProccessor
                     {
                         using (StreamReader streamReader = new StreamReader(dataStream))
                         {
-                            responceFromServer = streamReader.ReadToEnd();
+                           responceFromServer = streamReader.ReadToEnd();
                         }
                     }
                 }
@@ -178,6 +216,7 @@ namespace ImageProccessor
                 Directory.CreateDirectory($"{newPath}" + $"\\{file.Value}");
                 File.Copy($"{file.Key.FullName}", fullNewPath, true);
             }
+            
 
         }
     }

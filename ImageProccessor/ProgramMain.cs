@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using static System.Console;
 
@@ -61,13 +62,57 @@ namespace ImageProccessor
                     break;
                 }
             }
-            _imageProc.ImageLoading += (sender, e) => { _skin.Render(e.Message);};
+            _imageProc.ImageLoadingEvent += (sender, e) => { _skin.Render(e.Message);};
+            _imageProc.SortImageByLocationEvent += (sender, e) => { _skin.Render(e.Message); };
+            _imageProc.SortPhotoByYearEvent += (sender, e) => { _skin.Render(e.Message); };
+            _imageProc.AddDateOnPhotoEvent += (sender, e) => { _skin.Render(e.Message); };
+            _imageProc.RenamePhotoDateEvent += (sender, e) => { _skin.Render(e.Message); };
             _imageProc.LoadPhoto();
-            _imageProc.RenamePhotoDate();
-            _imageProc.AddDateOnPhoto();
-            _imageProc.SortPhotoByYear();
-            _imageProc.SortImageByLocation();
-            Console.ReadLine();
+            ShowMessage();
+            bool p = true;
+            while (p)
+            {
+                switch (ReadKey(true).Key)
+                {
+                    case ConsoleKey.Q:
+                    {
+                        _imageProc.RenamePhotoDateAsync();
+                        break;
+                    }
+
+                    case ConsoleKey.W:
+                    {
+                        _imageProc.AddDateOnPhotoAsync();
+                        break;
+                    }
+
+                    case ConsoleKey.E:
+                    {
+                        _imageProc.SortPhotoByYearAsync();
+                        break;
+                    }
+
+                    case ConsoleKey.R:
+                    {
+                        _imageProc.SortImageByLocationAsync();
+                        break;
+                    }
+
+                    case ConsoleKey.C:
+                    {
+                        ShowMessage();
+                        break; ;
+                    }
+
+                    case ConsoleKey.Escape:
+                    {
+                        p = false;
+                        _skin.Render("Выключение...");
+                        Thread.Sleep(1500);
+                        break;
+                    }
+                }
+            }
         }
 
         private static string ChooseColor()
@@ -81,6 +126,18 @@ namespace ImageProccessor
             int number = int.Parse(ReadLine());
             number--;
             return number.ToString();
+        }
+
+        private static void ShowMessage()
+        {
+            _skin.Clear();
+            _skin.Render("Элементы управления:");
+            _skin.Render("Для переименования фотографий в соответствии с датой съемки нажмите Q");
+            _skin.Render("Для добавления на фотографии отметки даты и времени нажмите W");
+            _skin.Render("Для сортировки фотографий по годам нажмите E");
+            _skin.Render("Для сортировки фотографий в зависимости от геолокации нажмите R");
+            _skin.Render("Для очистки окна нажмите С");
+            _skin.Render("Для закрытия приложения нажмите ESC");
         }
     }
 }
