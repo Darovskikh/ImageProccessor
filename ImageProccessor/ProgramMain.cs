@@ -64,7 +64,9 @@ namespace ImageProccessor
             _imageProc.ImageLoading += (sender, e) => { _skin.Render(e.Message);};
             _imageProc.LoadPhoto();
             //_imageProc.RenamePhotoDate();
-            _imageProc.AddDateOnPhoto();
+            //_imageProc.AddDateOnPhoto();
+            //_imageProc.SortPhotoByYear();
+            _imageProc.SortImageByLocation();
             Console.ReadLine();
         }
 
