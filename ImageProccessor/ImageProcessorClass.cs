@@ -2,23 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Mime;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.Net;
 using System.Windows.Forms;
 using System.Xml;
-using System.Xml.Linq;
-using System.Xml.Serialization;
 using MetadataExtractor;
-using Yandex;
-using MetadataExtractor.IO;
-using MetadataExtractor.Formats;
 using MetadataExtractor.Formats.Exif;
-using MetadataExtractor.Util;
 using Directory = System.IO.Directory;
 
 namespace ImageProccessor
@@ -100,7 +90,7 @@ namespace ImageProccessor
                 Image img = Images[i];
                 using (Graphics graphics = Graphics.FromImage(img))
                 {
-                    graphics.DrawString($"{file.LastWriteTime.ToLongDateString()}_{file.LastWriteTime.ToLongTimeString()}", new Font("Verdana", (float)40), new SolidBrush(Color.White), img.HorizontalResolution + img.Width - 1000, img.VerticalResolution + 50);
+                    graphics.DrawString($"{file.LastWriteTime.ToLongDateString()}_{file.LastWriteTime.ToLongTimeString()}", new Font("San Francisco", (float)50), new SolidBrush(Color.White), img.HorizontalResolution + img.Width - 1000, img.VerticalResolution + 50);
                     img.Save($"{newPath}/{file.Name}");
                 }
                 i++;
