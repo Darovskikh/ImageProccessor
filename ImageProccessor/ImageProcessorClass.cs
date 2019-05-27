@@ -204,18 +204,28 @@ namespace ImageProccessor
                         }
                     }
                     filesLocationDictionary.Add(file.Key, placeAdress);
+                    Task.Run(() =>
+                    {
+                        foreach (var file1 in filesLocationDictionary)
+                        {
+                            string fullNewPath = $"{newPath}" + $"\\{file1.Value}" + $"\\{file1.Key.Name}";
+                            Directory.CreateDirectory($"{newPath}" + $"\\{file1.Value}");
+                            File.Copy($"{file1.Key.FullName}", fullNewPath, true);
+                        }
+                    });
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine(e);
                 }
             }
-            foreach (var file in filesLocationDictionary)
-            {
-                string fullNewPath = $"{newPath}" + $"\\{file.Value}" + $"\\{file.Key.Name}";
-                Directory.CreateDirectory($"{newPath}" + $"\\{file.Value}");
-                File.Copy($"{file.Key.FullName}", fullNewPath, true);
-            }
+
+            //foreach (var file in filesLocationDictionary)
+            //{
+            //    string fullNewPath = $"{newPath}" + $"\\{file.Value}" + $"\\{file.Key.Name}";
+            //    Directory.CreateDirectory($"{newPath}" + $"\\{file.Value}");
+            //    File.Copy($"{file.Key.FullName}", fullNewPath, true);
+            //}
             
 
         }
