@@ -39,7 +39,7 @@ namespace ImageProccessor
         public void LoadPhoto()
         {
             Console.WriteLine();
-            ImageLoadingEvent?.Invoke(this, new ImageProcEventArgs() {Message = "Укажите путь к папке с изображениями"});
+            ImageLoadingEvent?.Invoke(this, new ImageProcEventArgs() { Message = "Укажите путь к папке с изображениями" });
             Thread thread = new Thread(() =>
             {
                 using (FolderBrowserDialog fbd = new FolderBrowserDialog())
@@ -73,7 +73,7 @@ namespace ImageProccessor
         public async void RenamePhotoDateAsync()
         {
             RenamePhotoDateEvent?.Invoke(this, new ImageProcEventArgs() { Message = "Переименование начато" });
-            await Task.Run(()=>RenamePhotoDate());
+            await Task.Run(() => RenamePhotoDate());
             RenamePhotoDateEvent?.Invoke(this, new ImageProcEventArgs() { Message = "Переименование завершено" });
         }
 
@@ -110,12 +110,12 @@ namespace ImageProccessor
                 string fullnewpath = newPath + newpath1;
                 File.Copy($"{file.FullName}", fullnewpath, true);
             }
-            
+
         }
 
         private void AddDateOnPhoto()
         {
-           
+
             DirectoryInfo drInfo = new DirectoryInfo(_path);
             string newPath = _path + $@"\{drInfo.Name}_AddDateOnPhoto";
             Directory.CreateDirectory(newPath);
@@ -134,7 +134,7 @@ namespace ImageProccessor
 
         private void SortPhotoByYear()
         {
-            
+
             DirectoryInfo drInfo = new DirectoryInfo(_path);
             string newPath = _path + $@"\{drInfo.Name}_SortPhotoByYear";
             Directory.CreateDirectory(newPath);
@@ -150,57 +150,51 @@ namespace ImageProccessor
                 Directory.CreateDirectory($"{newPath}" + $"\\{file.Value}");
                 File.Copy($"{file.Key.FullName}", fullNewPath, true);
             }
-           
+
 
         }
 
         private void SortImageByLocation()
         {
-            
+
             DirectoryInfo drInfo = new DirectoryInfo(_path);
             string newPath = _path + $@"\{drInfo.Name}_SortImageByLocation";
             Directory.CreateDirectory(newPath);
-            Dictionary<FileInfo,GeoLocation > filesDictionary = new Dictionary<FileInfo, GeoLocation>();
-            Dictionary<FileInfo,string> filesLocationDictionary = new Dictionary<FileInfo, string>();
+            Dictionary<FileInfo, GeoLocation> filesDictionary = new Dictionary<FileInfo, GeoLocation>();
+            Dictionary<FileInfo, string> filesLocationDictionary = new Dictionary<FileInfo, string>();
             foreach (var file in FileInfos)
             {
                 var gps = ImageMetadataReader.ReadMetadata(file.FullName).OfType<GpsDirectory>().FirstOrDefault();
                 var location = gps?.GetGeoLocation();
-                if(location!=null)
-                    filesDictionary.Add(file,location);
+                if (location != null)
+                    filesDictionary.Add(file, location);
             }
 
-            foreach (var file in filesDictionary) 
+            foreach (var file in filesDictionary)
             {
                 string responceFromServer = null;
                 string placeAdress = null;
-                string adress = $"https://geocode-maps.yandex.ru/1.x/?apikey=06513974-5a2a-40aa-8d37-3c1e22e9f3ac&geocode={file.Value.Longitude.ToString()},{file.Value.Latitude.ToString()}";
-                WebRequest wtRequest = WebRequest.Create(adress);
-                using (HttpWebResponse response = (HttpWebResponse) wtRequest.GetResponse())
-                {
-                    using (Stream dataStream = response.GetResponseStream())
-                    {
-                        using (StreamReader streamReader = new StreamReader(dataStream))
-                        {
-                           responceFromServer = streamReader.ReadToEnd();
-                        }
-                    }
-                }
                 try
                 {
-                    using (TextReader reader = new StringReader(responceFromServer))
+                    string adress = $"https://geocode-maps.yandex.ru/1.x/?apikey=06513974-5a2a-40aa-8d37-3c1e22e9f3ac&geocode={file.Value.Longitude.ToString()},{file.Value.Latitude.ToString()}";
+                    WebRequest wtRequest = WebRequest.Create(adress);
+                    using (HttpWebResponse response = (HttpWebResponse)wtRequest.GetResponse())
                     {
-                        using (XmlReader xmlReader = XmlReader.Create(reader))
+                        using (Stream dataStream = response.GetResponseStream())
                         {
-                            xmlReader.MoveToContent();
-                            while (xmlReader.Read())
+                            using (XmlReader xmlReader = XmlReader.Create(dataStream))
                             {
-                                if (xmlReader.Name == "formatted")
+                                xmlReader.MoveToContent();
+                                while (xmlReader.Read())
                                 {
-                                    placeAdress = xmlReader.ReadString();
-                                    break;
+                                    if (xmlReader.Name == "formatted")
+                                    {
+                                        placeAdress = xmlReader.ReadString();
+                                        break;
+                                    }
                                 }
                             }
+
                         }
                     }
                     filesLocationDictionary.Add(file.Key, placeAdress);
@@ -219,14 +213,6 @@ namespace ImageProccessor
                     Console.WriteLine(e);
                 }
             }
-
-            //foreach (var file in filesLocationDictionary)
-            //{
-            //    string fullNewPath = $"{newPath}" + $"\\{file.Value}" + $"\\{file.Key.Name}";
-            //    Directory.CreateDirectory($"{newPath}" + $"\\{file.Value}");
-            //    File.Copy($"{file.Key.FullName}", fullNewPath, true);
-            //}
-            
 
         }
     }
